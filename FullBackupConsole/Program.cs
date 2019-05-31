@@ -44,7 +44,7 @@ namespace FullBackupConsole
 
             foreach (DirectoryInfo directoryInfo in directoriesToCopy)
             {
-                Copy(directoryInfo.FullName, targetPath,args);
+                Copy(directoryInfo.FullName, targetBackupPath, args);
             }
         }
 
@@ -85,14 +85,13 @@ namespace FullBackupConsole
                 foreach (string fileext in igns)
                 {
                     string[] ext = fileName.Split('.');
+                    string extension = ext[ext.Length - 1];
 
-                    if (ext.Length == 2)
+                    if (extension.ToLower().Trim() == fileext.ToLower().Trim())
                     {
-                        if (ext[1].ToLower().Trim() == fileext.ToLower().Trim())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
+
                 }
             }
 
@@ -182,15 +181,23 @@ namespace FullBackupConsole
             {
                 string fullFileName = fi.Name + "." + fi.Extension;
 
-                if (!IsIgnoredFile(fullFileName, args))
+                try
                 {
-                    Console.WriteLine(@"Copiando {0}\{1}", target.FullName, fi.Name);
-                    fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+                    if (!IsIgnoredFile(fullFileName, args))
+                    {
+                        Console.WriteLine(@"Copiando {0}\{1}", target.FullName, fi.Name);
+                        fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+                    }
+                    else
+                    {
+                        Log("Arquivo ignorado " + fullFileName);
+                    }
                 }
-                else
+                catch (Exception er)
                 {
+                    Log("Erro ao copiar " + fullFileName + er.Message);
+                }
 
-                }
             }
 
             // Copy each subdirectory using recursion.
