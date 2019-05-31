@@ -108,7 +108,7 @@ namespace FullBackupConsole
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-                hourPath = Path.Combine(path, (today.Hour + "" + today.Minute + "" + today.Second));
+                hourPath = Path.Combine(path, DateTime.Now.ToString("HHmmss"));
                 Directory.CreateDirectory(hourPath);
             }
 
