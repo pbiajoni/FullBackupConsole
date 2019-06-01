@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -15,6 +16,8 @@ namespace FullBackupConsole
         //-ignore[Pasta1,Pasta2,Pasta3]
         //-ignoreext[exe,mp3,mp4]
         static string log = "";
+        static string notCopied = "";
+        static long totalSize = 0;
         static List<DirectoryInfo> directoriesToCopy = new List<DirectoryInfo>();
         static void Main(string[] args)
         {
@@ -101,13 +104,18 @@ namespace FullBackupConsole
         static string GetBackupFolderName(string targetPath)
         {
             DateTime today = DateTime.Now;
-            string folderName = today.Day + "_" + today.Month + "_" + today.Year;
+            string folderName = DateTime.Now.ToString("dd_MM_yyyy");
             string path = Path.Combine(targetPath, folderName);
             string hourPath = "";
 
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
+                hourPath = Path.Combine(path, DateTime.Now.ToString("HHmmss"));
+                Directory.CreateDirectory(hourPath);
+            }
+            else
+            {
                 hourPath = Path.Combine(path, DateTime.Now.ToString("HHmmss"));
                 Directory.CreateDirectory(hourPath);
             }
@@ -187,6 +195,8 @@ namespace FullBackupConsole
                     {
                         Console.WriteLine(@"Copiando {0}\{1}", target.FullName, fi.Name);
                         fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+                        totalSize += fi.Length;
+                        Console.WriteLine("Total copiado " + ToSize(totalSize));
                     }
                     else
                     {
@@ -207,6 +217,13 @@ namespace FullBackupConsole
                     target.CreateSubdirectory(diSourceSubDir.Name);
                 CopyAll(diSourceSubDir, nextTargetSubDir, args);
             }
+        }
+
+        static void ZipPath(string startPath, string zipPath)
+        {
+            //string startPath = @"c:\example\start";
+            //string zipPath = @"c:\example\result.zip";
+            ZipFile.CreateFromDirectory(startPath, zipPath, CompressionLevel.Optimal, true);
         }
     }
 }
